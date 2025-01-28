@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flashcard Game</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, orange, black);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .button {
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 8px;
+      background-color: orange;
+      color: black;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .button:hover {
+      transform: scale(1.05);
+    }
+
+    .set-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .box {
+      padding: 1rem;
+      background-color: black;
+      color: orange;
+      text-align: center;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .box:hover {
+      transform: scale(1.1);
+    }
+
+    .question-card {
+      margin-top: 2rem;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .options button {
+      padding: 0.8rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      background-color: orange;
+      color: black;
+      cursor: pointer;
+    }
+
+    .options button:hover {
+      background-color: #ff9900;
+    }
+
+    .popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: black;
+      color: orange;
+      padding: 2rem;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="welcome-screen">
+    <h1>WELCOME TO THE PREP ZONE</h1>
+    <button class="button" onclick="startGame()">Start Now</button>
+  </div>
+
+  <div class="container hidden" id="set-screen">
+    <h1>Select a Set</h1>
+    <div class="set-container" id="sets-container"></div>
+  </div>
+
+  <div class="container hidden" id="quiz-screen">
+    <h1 id="question"></h1>
+    <div class="options" id="options-container"></div>
+  </div>
+
+  <div class="popup hidden" id="popup">
+    <h2 id="popup-message"></h2>
+    <button class="button" onclick="backToSets()">Back to Sets</button>
+  </div>
+
+  <script>
+    const questions = [
+      [
+        { question: "What is 2 + 2?", options: ["4", "5"], answer: "4" },
+        { question: "What is the capital of France?", options: ["Paris", "London"], answer: "Paris" },
+        { question: "What is 5 x 3?", options: ["15", "10"], answer: "15" },
+        { question: "Which planet is closest to the sun?", options: ["Mercury", "Mars"], answer: "Mercury" },
+        { question: "What is the boiling point of water?", options: ["100°C", "90°C"], answer: "100°C" },
+        { question: "What color is the sky?", options: ["Blue", "Green"], answer: "Blue" },
+        { question: "Which animal is known as the king of the jungle?", options: ["Lion", "Tiger"], answer: "Lion" },
+        { question: "What is 10 / 2?", options: ["5", "4"], answer: "5" },
+        { question: "What is the square root of 16?", options: ["4", "5"], answer: "4" },
+        { question: "Which ocean is the largest?", options: ["Pacific", "Atlantic"], answer: "Pacific" }
+      ],
+      [
+        { question: "What is 3 + 5?", options: ["8", "9"], answer: "8" },
+        { question: "What is the capital of Japan?", options: ["Tokyo", "Beijing"], answer: "Tokyo" },
+        { question: "What is 6 x 7?", options: ["42", "36"], answer: "42" },
+        { question: "Which gas do plants use in photosynthesis?", options: ["Carbon Dioxide", "Oxygen"], answer: "Carbon Dioxide" },
+        { question: "What is the freezing point of water?", options: ["0°C", "10°C"], answer: "0°C" },
+        { question: "What is the largest mammal?", options: ["Blue Whale", "Elephant"], answer: "Blue Whale" },
+        { question: "What is 8 x 8?", options: ["64", "72"], answer: "64" },
+        { question: "Which planet is known as the Red Planet?", options: ["Mars", "Jupiter"], answer: "Mars" },
+        { question: "What is the capital of Germany?", options: ["Berlin", "Munich"], answer: "Berlin" },
+        { question: "Which element has the chemical symbol O?", options: ["Oxygen", "Osmium"], answer: "Oxygen" }
+      ],
+      [
+        { question: "What is 7 + 2?", options: ["9", "8"], answer: "9" },
+        { question: "What is the capital of Italy?", options: ["Rome", "Naples"], answer: "Rome" },
+        { question: "What is 9 x 9?", options: ["81", "72"], answer: "81" },
+        { question: "Which organ pumps blood in the body?", options: ["Heart", "Liver"], answer: "Heart" },
+        { question: "What is 12 / 3?", options: ["4", "5"], answer: "4" },
+        { question: "What is the largest desert in the world?", options: ["Sahara", "Gobi"], answer: "Sahara" },
+        { question: "What is 11 x 2?", options: ["22", "24"], answer: "22" },
+        { question: "Which is the longest river in the world?", options: ["Nile", "Amazon"], answer: "Nile" },
+        { question: "What is the capital of Spain?", options: ["Madrid", "Barcelona"], answer: "Madrid" },
+        { question: "Which planet is known for its rings?", options: ["Saturn", "Uranus"], answer: "Saturn" }
+      ]
+    ];
+
+    let currentSetIndex = 0;
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    function startGame() {
+      document.getElementById("welcome-screen").classList.add("hidden");
+      document.getElementById("set-screen").classList.remove("hidden");
+      loadSets();
+    }
+
+    function loadSets() {
+      const setsContainer = document.getElementById("sets-container");
+      setsContainer.innerHTML = "";
+      questions.forEach((_, index) => {
+        const box = document.createElement("div");
+        box.className = "box";
+        box.textContent = `Set ${index + 1}`;
+        box.onclick = () => startSet(index);
+        setsContainer.appendChild(box);
+      });
+    }
+
+    function startSet(setIndex) {
+      currentSetIndex = setIndex;
+      currentQuestionIndex = 0;
+      score = 0;
+      document.getElementById("set-screen").classList.add("hidden");
+      document.getElementById("quiz-screen").classList.remove("hidden");
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      const questionData = questions[currentSetIndex][currentQuestionIndex];
+      document.getElementById("question").textContent = questionData.question;
+      const optionsContainer = document.getElementById("options-container");
+      optionsContainer.innerHTML = "";
+
+      questionData.options.forEach(option => {
+        const button = document.createElement("button");
+        button.textContent = option;
+        button.onclick = () => checkAnswer(option);
+        optionsContainer.appendChild(button);
+      });
+    }
+
+    function checkAnswer(selected) {
+      const questionData = questions[currentSetIndex][currentQuestionIndex];
+      if (selected === questionData.answer) {
+        alert("Correct!");
+        score++;
+      } else {
+        alert("Wrong!");
+      }
+
+      currentQuestionIndex++;
+      if (currentQuestionIndex < questions[currentSetIndex].length) {
+        loadQuestion();
+      } else {
+        showPopup();
+      }
+    }
+
+    function showPopup() {
+      document.getElementById("quiz-screen").classList.add("hidden");
+      document.getElementById("popup").classList.remove("hidden");
+      document.getElementById("popup-message").textContent = `Your Score: ${score}/${questions[currentSetIndex].length}`;
+    }
+
+    function backToSets() {
+      document.getElementById("popup").classList.add("hidden");
+      document.getElementById("set-screen").classList.remove("hidden");
+    }
+  </script>
+</body>
+</html>
